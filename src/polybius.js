@@ -3,49 +3,56 @@
 // Only add code (e.g., helper methods, variables, etc.) within the scope
 // of the anonymous function on line 6
 const polybiusModule = (function () {
-  // you can add any code you want within this function scope
   function polybius(input, encode = true) {
-    let joined;
-    let final = []
-    let numbers = [{ 11: 'a' }, { 21: 'b' }, { 31: 'c' }, { 41: 'd' }, { 51: 'e' }, { 12: 'f' }, { 22: 'g' },
-    { 32: 'h' }, { 42: 'i' }, { 42: 'j' }, { 52: 'k' }, { 13: 'l' }, { 23: 'm' }, { 33: 'n' }, { 43: 'o' },
-    { 53: 'p' }, { 14: 'q' }, { 24: 'r' }, { 34: 's' }, { 44: 't' }, { 54: 'u' }, { 15: 'v' }, { 25: 'w' },
-    { 35: 'x' }, { 45: 'y' }, { 55: 'z' }];
+    let square = [
+      ["a", "b", "c", "d", "e"],
+      ["f", "g", "h", "(i/j)", "k"],
+      ["l", "m", "n", "o", "p"],
+      ["q", "r", "s", "t", "u"],
+      ["v", "w", "x", "y", "z", " "],
+    ];
     if (encode) {
-      let letters = input.split('');
-      for (let i = 0; i < letters.length; i++) {
-        if (letters[i] == ' ') {
-          final.push(letters[i])
+      let userInput = input.split("");
+      let fixedUserInput = userInput.map((string) => {
+        let lowCase = string.toLowerCase();
+        if (lowCase === "i" || lowCase === "j") {
+          return "(i/j)";
         }
-        for (let j = 0; j < numbers.length; j++) {
-          if (letters[i].includes(Object.values(numbers[j]))) {
-            final.push(Object.keys(numbers[j]).join(''));
+        return lowCase;
+      });
+      let xArr = [];
+      let yArr = fixedUserInput.map((letter) => {
+        for (let i = 0; i < square.length; i++) {
+          const row = square[i];
+          if (row.find((alpha) => alpha === letter)) {
+            xArr.push(i + 1);
+            return row.indexOf(letter) + 1;
           }
         }
-      }
-      joined = final.join('')
-      console.log(joined)
-      return joined;
-    } else if (!encode) {
-      let letters = input.split('');
-      console.log(letters)
-      for (let i = 0; i < letters.length; i++) {
-        if (letters[i] == ' ') {
-          final.push(letters[i])
+      });
+      result = xArr.reduce((acc, xValue, index) => {
+        let pair = `${yArr[index]}${xValue}`;
+        if (pair === "65") {
+          pair = " ";
         }
-        for (let j = 0; j < numbers.length; j++) {
-          if (letters[i].includes(Object.values(numbers[j]))) {
-            final.push(Object.values(numbers[j]));
-          }
-        }
-      }
-      joined = final.join()
-      console.log(joined)
-      return joined;
+        acc.push(pair);
+        return acc;
+      }, []);
     }
+    if (!encode) {
+      let spacesAdded = input.replace(" ", 65);
+      if (spacesAdded.length % 2 !== 0) return false;
+      let coordinates = spacesAdded.match(/..?/g);
+      result = coordinates.map((yx) => {
+        let rowIndex = yx.split("")[1] - 1;
+        let columnIndex = yx.split("")[0] - 1;
+        return square[rowIndex][columnIndex];
+      });
+    }
+    return result.join("");
   }
-    return {
-      polybius,
-    };
-  }) ();
-  module.exports = { polybius: polybiusModule.polybius };
+  return {
+    polybius,
+  };
+})();
+module.exports = { polybius: polybiusModule.polybius };
